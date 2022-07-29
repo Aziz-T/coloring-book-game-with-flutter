@@ -1,9 +1,12 @@
 import 'package:colorgame/values/icons/eraser_icon_icons.dart';
 import 'package:colorgame/widgets/palette_widget/palette_item.dart';
-import 'package:floodfill_image/floodfill_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:provider/provider.dart';
 import 'package:zoom_widget/zoom_widget.dart';
+import 'dart:ui' as ui;
+import '../../packages/image_flood_fill/floodfill_image.dart';
+import '../../providers/main_provider.dart';
 
 class ImageColorPage extends StatefulWidget {
   final String? title;
@@ -23,6 +26,9 @@ class _ImageColorPageState extends State<ImageColorPage> {
   // create some values
   Color pickerColor = Color(0xffffffff);
   double _currentSliderValue = 20;
+
+
+
   void changeColor(Color color) {
     setState(() => pickerColor = color);
   }
@@ -81,6 +87,9 @@ class _ImageColorPageState extends State<ImageColorPage> {
                   fillColor: _fillColor,
                   avoidColor: [Colors.transparent, Colors.black],
                   tolerance: 19,
+                  onFloodFillEnd: (img){
+                    context.read<MainProvider>().setImage(img);
+                  },
                 ),
               ),
             ),
