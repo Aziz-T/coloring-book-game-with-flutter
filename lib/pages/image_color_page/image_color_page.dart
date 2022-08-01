@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:colorgame/values/icons/eraser_icon_icons.dart';
 import 'package:colorgame/widgets/palette_widget/palette_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:get/route_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:zoom_widget/zoom_widget.dart';
 import 'dart:ui' as ui;
@@ -10,8 +13,11 @@ import '../../providers/main_provider.dart';
 
 class ImageColorPage extends StatefulWidget {
   final String? title;
-  final String path;
-  const ImageColorPage({Key? key, this.title, required this.path}) : super(key: key);
+  final String? path;
+  final int? index;
+  final File? file;
+  const ImageColorPage({Key? key, this.title, this.path, this.file, this.index})
+      : super(key: key);
 
   @override
   _ImageColorPageState createState() => _ImageColorPageState();
@@ -26,8 +32,17 @@ class _ImageColorPageState extends State<ImageColorPage> {
   // create some values
   Color pickerColor = Color(0xffffffff);
   double _currentSliderValue = 20;
-
-
+  late final ImageProvider imageProvider;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (widget.path != null) {
+      imageProvider = AssetImage(widget.path!);
+    } else {
+      imageProvider = FileImage(widget.file!);
+    }
+  }
 
   void changeColor(Color color) {
     setState(() => pickerColor = color);
@@ -51,8 +66,8 @@ class _ImageColorPageState extends State<ImageColorPage> {
               child: const Text('Got it'),
               onPressed: () {
                 setState(() {
-                 _fillColor = pickerColor;
-                 _colorize = pickerColor;
+                  _fillColor = pickerColor;
+                  _colorize = pickerColor;
                 });
                 Navigator.of(context).pop();
               },
@@ -66,38 +81,84 @@ class _ImageColorPageState extends State<ImageColorPage> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    return SafeArea(
-      child: Scaffold(
-        // appBar: MyAppBar(
-        //   title: "Color",
-        // ),
-        body: Column(
-          children: <Widget>[
-            buildRow(),
-            Container(
-              width: w,
-              height: h,
-              child: Zoom(
-                maxZoomHeight: 600,
-                maxZoomWidth: 600,
-                initZoom: 0,
-                child: FloodFillImage(
-                  imageProvider: AssetImage(
-                      widget.path),
-                  fillColor: _fillColor,
-                  avoidColor: [Colors.transparent, Colors.black],
-                  tolerance: 19,
-                  onFloodFillEnd: (img){
-                    context.read<MainProvider>().setImage(img);
-                  },
+    return WillPopScope(
+      onWillPop: () async {
+        if (widget.path != null) {
+          await context
+              .read<MainProvider>()
+              .saveImage(name: widget.path!.split('/').last);
+        } else {
+          await context.read<MainProvider>().saveImage(
+              name: widget.file!.path.split('/').last, index: widget.index);
+        }
+        return Future.value(true);
+      },
+      child: SafeArea(
+        child: Scaffold(
+          // appBar: MyAppBar(
+          //   title: "Color",
+          // ),
+          body: Column(
+            children: <Widget>[
+              buildRow(),
+              Container(
+                width: w,
+                height: h,
+                child: Zoom(
+                  maxZoomHeight: 600,
+                  maxZoomWidth: 600,
+                  initZoom: 0,
+                  child: FloodFillImage(
+                    imageProvider: imageProvider,
+                    fillColor: _fillColor,
+                    avoidColor: [Colors.transparent, Colors.black],
+                    tolerance: 19,
+                    onFloodFillEnd: (img) {
+                      context.read<MainProvider>().setImage(img);
+                    },
+                  ),
                 ),
               ),
-            ),
-            Spacer(),
-            buildSingleChildScrollView()
-          ],
+              Spacer(),
+              buildSingleChildScrollView()
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Future<void> _showSaveDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Save Coloring'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: const <Widget>[
+                // Text('Save Coloring'),
+                Text('Do you want to save the coloring?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () async {
+                Get.back();
+              },
+            ),
+            TextButton(
+              child: const Text('Save'),
+              onPressed: () async {
+                // await context.read<MainProvider>().saveImage();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -206,6 +267,14 @@ class _ImageColorPageState extends State<ImageColorPage> {
               color: Colors.black,
               size: 25,
             )),
+        // TextButton(
+        //     onPressed: () {
+        //       context.read<MainProvider>().saveImage();
+        //     },
+        //     child: Text(
+        //       "Save",
+        //       style: TextStyle(fontFamily: 'McLaren'),
+        //     ))
         // IconButton(
         //     onPressed: () {
         //       setState(() {
