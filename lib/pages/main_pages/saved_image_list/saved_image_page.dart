@@ -29,7 +29,7 @@ class _SavedImagePageState extends State<SavedImagePage> {
                     List.generate(snapshot.savedImageList.length, (index) {
                   return Center(
                     child: ImageGridItem(
-                      file: snapshot.savedImageList[index],
+                      file: snapshot.savedImageList[index].pathToFile(),
                       index: index,
                     ),
                   );

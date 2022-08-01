@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../models/image_model/image_model.dart';
 
 class ImageGridListPage extends StatefulWidget {
-  final List<ImageModel> dataList;
+  final List<ImageModelData> dataList;
   final String asset;
   const ImageGridListPage(
       {Key? key, required this.dataList, required this.asset})

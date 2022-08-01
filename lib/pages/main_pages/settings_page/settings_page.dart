@@ -10,6 +10,15 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      body: Column(
+        children: [
+          // TextButton(
+          //   onPressed: () {},
+          //   child: Text("Share App",style: TextStyle(fontFamily: 'McLaren'),),
+          // ),
+        ],
+      ),
+    );
   }
 }

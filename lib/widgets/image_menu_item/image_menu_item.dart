@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 
 
 class ImageMenuItem extends StatelessWidget {
-  final List<ImageModel> imageList;
+  final List<ImageModelData> imageList;
   final String title;
   final String asset;
   final Widget navigatePage;

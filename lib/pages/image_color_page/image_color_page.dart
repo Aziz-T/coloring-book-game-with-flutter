@@ -108,14 +108,16 @@ class _ImageColorPageState extends State<ImageColorPage> {
                   maxZoomHeight: 600,
                   maxZoomWidth: 600,
                   initZoom: 0,
-                  child: FloodFillImage(
-                    imageProvider: imageProvider,
-                    fillColor: _fillColor,
-                    avoidColor: [Colors.transparent, Colors.black],
-                    tolerance: 19,
-                    onFloodFillEnd: (img) {
-                      context.read<MainProvider>().setImage(img);
-                    },
+                  child: Center(
+                    child: FloodFillImage(
+                      imageProvider: imageProvider,
+                      fillColor: _fillColor,
+                      avoidColor: [Colors.transparent, Colors.black],
+                      tolerance: 19,
+                      onFloodFillEnd: (img) {
+                        context.read<MainProvider>().setImage(img);
+                      },
+                    ),
                   ),
                 ),
               ),

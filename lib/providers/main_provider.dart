@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:colorgame/assets_const.dart';
@@ -10,28 +11,29 @@ import '../models/image_model/image_model.dart';
 
 class MainProvider extends ChangeNotifier {
 
-  List<ImageModel> animalList = [];
-  List<ImageModel> flowersList = [];
-  List<ImageModel> mattersList = [];
-  List<ImageModel> plantsList = [];
-  List<File> savedImageList = [];
+  List<ImageModelData> animalList = [];
+  List<ImageModelData> flowersList = [];
+  List<ImageModelData> mattersList = [];
+  List<ImageModelData> plantsList = [];
 
+  List<ImageModelData> savedImageList = [];
+  ImageModel? imageModel;
   ui.Image? img;
 
   final LocalStorage storage = LocalStorage('coloring_app');
 
   Future<void> loadData() async {
     AssetsConst.animals.asMap().forEach((key, value) {
-      animalList.add(ImageModel(path: value));
+      animalList.add(ImageModelData(path: value));
     });
     AssetsConst.flowers.asMap().forEach((key, value) {
-      flowersList.add(ImageModel(path: value));
+      flowersList.add(ImageModelData(path: value));
     });
     AssetsConst.matters.asMap().forEach((key, value) {
-      mattersList.add(ImageModel(path: value));
+      mattersList.add(ImageModelData(path: value));
     });
     AssetsConst.plants.asMap().forEach((key, value) {
-      plantsList.add(ImageModel(path: value));
+      plantsList.add(ImageModelData(path: value));
     });
     notifyListeners();
   }
@@ -53,22 +55,37 @@ class MainProvider extends ChangeNotifier {
         ..writeAsBytesSync(pngBytes!.buffer.asInt8List());
       if (index != null) {
         savedImageList.removeAt(index);
-        savedImageList.add(file);
+        savedImageList.add(ImageModelData(path: file.path));
         notifyListeners();
       } else {
-        savedImageList.add(file);
+        savedImageList.add(ImageModelData(path: file.path));
       }
+      _saveToStorage(savedImageList);
     }
   }
 
   Future<void> deleteImage({int? index}) async {
     if (savedImageList.isNotEmpty && index != null) {
       savedImageList.removeAt(index);
+      _saveToStorage(savedImageList);
       notifyListeners();
     }
   }
 
-  Future<void> _saveToStorage(List<File> list) async {
-    storage.setItem('colored_images', list.asMap());
+  Future<void> _saveToStorage(List<ImageModelData> list) async {
+    imageModel = ImageModel(data: list);
+    storage.setItem('colored_images',  imageModel!.toJson());
   }
+
+  Future<void> getImageList() async {
+    await storage.ready;
+    var items = await storage.getItem('colored_images');
+    if (items != null) {
+      imageModel = ImageModel.fromJson(items);
+      savedImageList = imageModel?.data ?? [];
+    }
+    notifyListeners();
+  }
+
+
 }

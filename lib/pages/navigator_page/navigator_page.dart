@@ -18,23 +18,24 @@ class _HomeNavigatorState extends State<HomeNavigator> {
   int _currentIndex = 0;
   late PageController _pageController;
 
+  List<String> titles = ["Home","Colored Images","Settings"];
+
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
     WidgetsBinding.instance?.addPostFrameCallback((_){
-
       context.read<MainProvider>().loadData();
-
+      context.read<MainProvider>().getImageList();
     });
-
-
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(),
+      appBar: MyAppBar(
+        title: titles[_currentIndex],
+      ),
       body: SizedBox.expand(
         child: PageView(
           controller: _pageController,
